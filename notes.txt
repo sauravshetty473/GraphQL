@@ -1,0 +1,63 @@
+To create a GraphQL server
+
+First npm init --> npm  i express-graphql express graphql --> npm i --save-dev nodemon(dev dependency)
+change scripts in package.json, also change name of main file to server.js
+
+
+In server.js
+
+
+const express = require('express')
+const {graphqlHTTP} = require('express-graphql')
+
+
+app.use('/graphql', graphqlHTTP({
+    graphiql : true,                             //To use the graphql interface on the specified port
+    schema : schema
+}))
+
+
+const RootQueryType = new GraphQLObjectType({      // A RootQueryType holding other subtypes
+    name : 'Query',
+    description : 'Root Query',
+    fields : () => ({
+        users : {                  
+            type : GraphQLList(UserType),
+            description: 'List of All Users',
+            resolve:()=>users                           //will refer this array to fill values
+        },
+        posts : {
+            type : GraphQLList(PostType),
+            description: 'List of All Posts',
+            resolve:()=>posts
+        },
+    })
+})
+
+
+const UserType = new GraphQLObjectType({                    // subtype
+    name : 'User',
+    description : 'Users belonging to user base',
+    fields:()=>({
+        id : {
+            type : GraphQLNonNull(GraphQLInt)
+        },
+        first : {
+            type : GraphQLNonNull(GraphQLString)
+        },
+        last : {
+            type : GraphQLNonNull(GraphQLString)
+        },
+        posts : {
+            type : GraphQLList(PostType), 
+            resolve : (user) =>{                                 //resolve(parent, args)
+                return posts.filter(post=>post.userID === user.id)
+            }
+        }
+    })
+})
+
+
+
+
+app.listen(5000., ()=>console.log('Server Running'))
